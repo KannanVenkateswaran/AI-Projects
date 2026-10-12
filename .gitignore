@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# R temporary files
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# VS Code settings
+.vscode/
+
+# Temporary files
+*.tmp
+*.log

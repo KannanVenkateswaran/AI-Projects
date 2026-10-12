@@ -1,0 +1,4 @@
+"group","threshold","observations","TP","FP","FN","TN","accuracy_pct","error_pct","precision_pct","recall_pct","specificity_pct","false_positive_rate_pct","false_negative_rate_pct","f1_pct"
+"A",0.95,4000,2000,8,0,1992,99.8,0.2,99.6,100,99.6,0.4,0,99.8
+"B",1.02,4000,2000,1284,0,716,67.9,32.1,60.9,100,35.8,64.2,0,75.7
+"C",0.98,4000,1979,1767,21,233,55.3,44.7,52.83,98.95,11.65,88.35,1.05,68.88
