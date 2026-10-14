@@ -1,3 +1,5 @@
+"""Regression and invalid-input checks for the compiled C++ applications."""
+
 import csv
 import shutil
 import subprocess
@@ -6,7 +8,6 @@ import tempfile
 import xml.etree.ElementTree as ET
 
 from pathlib import Path
-
 
 # 1. Expected results from the original project
 
@@ -22,11 +23,9 @@ EXPECTED_ACCURACY = {
     "C": 55.30,
 }
 
-
 def read_csv(path):
     with path.open(newline="") as file:
         return list(csv.DictReader(file))
-
 
 # 2. Verify the linear classifier
 
@@ -78,7 +77,6 @@ def test_classifier(work):
             assert actual_matrices[key] == expected
 
     print("PASS: All classifier results match the original project.")
-
 
 # 3. Verify the McCulloch-Pitts neuron
 
@@ -138,7 +136,6 @@ def test_neuron(work):
 
     print("PASS: Neuron truth table and threshold range verified.")
 
-
 # 4. Verify normalization through the generated SVG files
 
 def test_normalization(work):
@@ -193,10 +190,14 @@ def test_normalization(work):
 
     print("PASS: Normalization and all three SVG graphs verified.")
 
-
 # 5. Prepare test inputs and execute the real C++ program
 
 def main():
+    if not __debug__:
+        raise RuntimeError("Run tests without Python -O or PYTHONOPTIMIZE.")
+    if len(sys.argv) != 4:
+        raise ValueError("Usage: regression_tests.py MODE EXECUTABLE DATA_DIRECTORY")
+
     mode = sys.argv[1]
     executable = Path(sys.argv[2]).resolve()
     original_data = Path(sys.argv[3]).resolve()
@@ -263,7 +264,6 @@ def main():
 
         else:
             raise ValueError(f"Unknown test mode: {mode}")
-
 
 if __name__ == "__main__":
     try:

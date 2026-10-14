@@ -1,10 +1,11 @@
+# Archived reference only; not used by the C++ build or tests.
 # Name: Kannan Venkateswaran
 # Refactor Date: 10/11/2026
 # CMSC 436 - Project 1: Car Classification
 # File: Data Analysis (data_analysis.R)
 #
 # Run from the 01-car-classification project folder:
-#   Rscript src/data_analysis.R
+#   Rscript reference/r/data_analysis.R
 #
 # This script:
 #   1. Loads Groups A, B, and C.

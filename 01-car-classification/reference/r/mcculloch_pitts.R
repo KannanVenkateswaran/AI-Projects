@@ -1,10 +1,11 @@
+# Archived reference only; not used by the C++ build or tests.
 # Name: Kannan Venkateswaran
 # Refactor Date: 10/11/2026
 # CMSC 436 - Project 1: Car Classification
-# File: src/mcculloch_pitts.R
+# File: reference/r/mcculloch_pitts.R
 #
 # Run from the project root:
-#   Rscript src/mcculloch_pitts.R
+#   Rscript reference/r/mcculloch_pitts.R
 #
 # The original neuron has three binary inputs (X, Y, Z), weights
 # (-3, +3, +1), and threshold -1. It uses a unipolar hard-threshold

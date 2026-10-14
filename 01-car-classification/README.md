@@ -1,140 +1,186 @@
-# Car Classification Using Artificial Neural Networks
+# Car Classification and a McCulloch–Pitts Neuron
 
 **CMSC 436 – Artificial Intelligence | Virginia Commonwealth University**
+**Author: Kannan Venkateswaran | Primary implementation: C++17**
 
-## Overview
+This project reconstructs an academic AI assignment in C++17. It loads and
+validates vehicle datasets, normalizes price and weight, draws SVG scatter
+plots, evaluates a fixed weighted linear threshold classifier, and verifies a
+three-input McCulloch–Pitts neuron against a Boolean truth table.
 
-This project explores fundamental artificial intelligence concepts through
-vehicle classification and the implementation of a McCulloch–Pitts artificial
-neuron.
+The classifier uses predetermined weights and thresholds; it does not train
+parameters or measure generalization on a held-out test set. The engineering
+focus is reproducible calculations, reusable libraries, clear interfaces, and
+automated tests.
 
-Using R, the project examines three datasets containing vehicle prices,
-weights, and classifications. It applies data normalization, linear
-classification, and performance evaluation to distinguish between small
-and large vehicles.
+## Requirements
 
-The project also demonstrates how a McCulloch–Pitts neuron can implement
-Boolean logic using weighted inputs and a threshold activation function.
+- A C++17 compiler with `std::filesystem` support.
+- CMake 3.16 or newer, plus a build tool such as Make or Ninja.
+- Python 3 for the automated regression tests (standard library only).
 
-## Technologies
+R and third-party C++ libraries are not required. Commands below target macOS
+and Linux using a single-configuration CMake generator such as Make or Ninja.
+Run them from `01-car-classification/`, the directory containing this README,
+`CMakeLists.txt`, and `data/`.
 
-- R
-- Base R graphics
-- Linear classification
-- McCulloch–Pitts neural networks
-
-## Project Structure
-
-```text
-01-car-classification/
-├── data/                     # Original vehicle datasets
-├── src/
-│   ├── data_analysis.R       # Data loading, normalization, visualization
-│   ├── linear_classifier.R   # Classification and performance evaluation
-│   └── mcculloch_pitts.R     # Artificial neuron implementation
-├── results/
-│   ├── figures/              # Generated scatter plots
-│   ├── classification_metrics.csv
-│   ├── confusion_matrices.csv
-│   ├── mcculloch_pitts_truth_table.csv
-│   └── mcculloch_pitts_threshold_range.csv
-└── README.md
-```
-
-## Implementation
-
-### 1. Data Analysis
-
-Three datasets (A, B, and C), each containing 4,000 observations,
-were analyzed.
-
-Each observation includes:
-- Vehicle price
-- Vehicle weight
-- Classification (0 = Small, 1 = Large)
-
-Min-max normalization was applied to price and weight values.
-Scatter plots were generated to visualize the distribution of both classes.
-
-![Group A Classification](results/figures/groupA_normalized.png)
-
-### 2. Linear Classification
-
-A weighted linear classifier was implemented to predict vehicle classes
-using normalized price and weight.
-
-The classifier evaluates:
-
-2x + y >= T
-
-Where:
-- x = Normalized price
-- y = Normalized weight
-- T = Classification threshold
-
-Performance was evaluated using confusion matrices, accuracy, precision,
-recall, specificity, and F1-score.
-
-#### Results
-
-| Dataset | Accuracy | Precision | Recall | F1-Score |
-|---------|----------|-----------|--------|----------|
-| Group A | 99.80% | 99.60% | 100.00% | 99.80% |
-| Group B | 67.90% | 60.90% | 100.00% | 75.70% |
-| Group C | 55.30% | 52.83% | 98.95% | 68.88% |
-
-Classification performance decreased as the distributions of small and
-large vehicles increasingly overlapped.
-
-### 3. McCulloch–Pitts Neuron
-
-A McCulloch–Pitts artificial neuron was implemented using three binary
-inputs (X, Y, Z).
-
-The neuron uses:
-- Weights: (-3, +3, +1)
-- Threshold: -1
-- Binary step activation function
-
-The resulting Boolean expression is:
-
-NOT X OR Y
-
-All eight possible input combinations were evaluated and verified against
-the expected truth table.
-
-The implementation also determines the valid threshold range:
-
--2 < T <= 0
-
-## Running the Project
-
-Requires an installation of R.
-
-From the project's root directory, run:
+## Build, test, and run
 
 ```bash
-Rscript src/data_analysis.R
-Rscript src/linear_classifier.R
-Rscript src/mcculloch_pitts.R
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+
+./build/data_analysis
+./build/linear_classifier
+./build/mcculloch_pitts
 ```
 
-Generated plots and CSV files are saved in the `results/` directory.
+The applications read `data/` relative to the current working directory and
+create `results/` automatically. Remain in the project root when running them.
+CTest writes its smoke-test results inside `build/`; the explicit application
+commands above produce the root-level outputs intended for inspection.
 
-No additional R packages are required.
+To build only the applications, without requiring Python:
 
-## Notes
+```bash
+cmake -S . -B build-apps -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build-apps --parallel
+```
 
-This project was originally completed as an assignment
-for CMSC 436 at Virginia Commonwealth University.
+## Architecture
 
-The R implementation was subsequently reconstructed using the original
-datasets, project documentation, mathematical models, and experimental
-results.
+| Files or directory | Responsibility |
+|---|---|
+| `include/car_data.hpp`, `src/car_data.cpp` | Shared records, numeric parsing, loading, min-max normalization |
+| `include/data_analysis.hpp`, `src/data_analysis.cpp` | SVG plotting through `data_analysis_lib` |
+| `include/linear_classifier.hpp`, `src/linear_classifier.cpp` | Predictions, confusion matrices, metrics through `linear_classifier_lib` |
+| `include/mcculloch_pitts.hpp`, `src/mcculloch_pitts.cpp` | Neuron logic, truth table, threshold range, reporting through `mcculloch_pitts_lib` |
+| `src/*_main.cpp` | Three application entry points and error handling |
+| `tests/test_*.cpp` | Native tests linked against the public library interfaces |
+| `tests/regression_tests.py` | End-to-end regression and invalid-input checks |
+| `data/` | Original, unmodified vehicle datasets |
+| `results/` | Seven reproducible C++ sample outputs |
+| `reference/r/` | Archived R scripts; excluded from the build and run workflow |
+| `docs/VERIFICATION.md` | Verification evidence and memory-safety methodology |
 
-The reconstructed classification results match the original reported
-confusion matrices.
+Both the analysis and classifier libraries link to `car_data`. The neuron
+library is independent. Applications and tests link the compiled libraries;
+tests do not include `.cpp` implementations or require special `main()` macros.
 
-The original report uses different linear equations for visualization
-(x + y = T) and classification (2x + y >= T). Both have been preserved
-to reflect the documented work.
+## Data and calculations
+
+Each of `groupA.txt`, `groupB.txt`, and `groupC.txt` contains 4,000 records:
+2,000 small cars and 2,000 large cars. The headerless CSV fields are price in
+USD, weight in pounds, and class (`0` = small, `1` = large).
+
+Price and weight are independently min-max normalized within each group:
+
+```text
+normalized_value = (value - minimum) / (maximum - minimum)
+```
+
+The loader rejects missing or empty inputs, malformed numbers, non-finite
+values, invalid labels, and constant-valued features that cannot be normalized.
+
+With normalized price `x` and weight `y`, the classifier predicts class 1 when
+`2*x + y >= T`, and class 0 otherwise. Thresholds are 0.95 for A, 1.02 for B,
+and 0.98 for C.
+
+**The original report used different equations for plotting and classification.**
+The SVGs preserve the visualization line `x + y = T`; they do not show the
+classifier's `2*x + y = T` decision boundary. Both formulas are retained for
+reproducibility.
+
+| Dataset | Accuracy | Precision | Recall | F1 |
+|---|---:|---:|---:|---:|
+| A | 99.80% | 99.60% | 100.00% | 99.80% |
+| B | 67.90% | 60.90% | 100.00% | 75.70% |
+| C | 55.30% | 52.83% | 98.95% | 68.88% |
+
+The CSV also reports error rate, specificity, false-positive rate, and
+false-negative rate. Metrics are percentages; undefined ratios return NaN.
+
+![Group A normalized vehicle data with the original visualization line](results/figures/groupA_normalized.svg)
+
+The McCulloch–Pitts neuron uses weights `(-3, 3, 1)` and threshold `-1`:
+`output = 1` when `-3*X + 3*Y + Z >= -1`. All eight binary input combinations
+match `(NOT X) OR Y`. The valid threshold interval is `-2 < T <= 0`;
+with integer thresholds, `-1` and `0` both work.
+
+## Generated outputs
+
+| Application | Output under `results/` |
+|---|---|
+| `data_analysis` | `figures/groupA_normalized.svg`, `figures/groupB_normalized.svg`, `figures/groupC_normalized.svg` |
+| `linear_classifier` | `classification_metrics.csv`, `confusion_matrices.csv` |
+| `mcculloch_pitts` | `mcculloch_pitts_truth_table.csv`, `mcculloch_pitts_threshold_range.csv` |
+
+These CSVs and SVGs are intentionally retained as GitHub samples. They can be
+deleted and regenerated. The older R-generated PNGs are omitted.
+
+## Automated testing and sanitizers
+
+CTest registers 14 tests: three smoke tests, three output regression tests,
+five invalid-input tests, and three native C++ unit-test executables. Native
+tests use explicit checks that remain active in Release builds. Run the Python
+harness without `-O` or `PYTHONOPTIMIZE`; it fails explicitly if assertions are
+disabled.
+
+For GCC or Clang with AddressSanitizer and UndefinedBehaviorSanitizer:
+
+```bash
+cmake -S . -B build-sanitize -DCMAKE_BUILD_TYPE=Debug \
+  "-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer" \
+  "-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined"
+cmake --build build-sanitize --parallel
+ASAN_OPTIONS="halt_on_error=1" \
+UBSAN_OPTIONS="halt_on_error=1:print_stacktrace=1" \
+ctest --test-dir build-sanitize --output-on-failure
+```
+
+Sanitizers detect problems on exercised execution paths; passing tests do not
+prove that all possible inputs are safe. See `docs/VERIFICATION.md` for the
+checks performed on this revision and the distinction from memory profiling.
+
+## Clean and reproduce a first run
+
+From the project root, the following removes the named generated build folders,
+all root-level results (including old PNGs), and possible direct-test leftovers.
+It leaves source files, original datasets, R references, and Git history intact.
+If the sample outputs are tracked, Git will show their deletion until rerun.
+
+```bash
+# Check the directory before deleting generated files.
+pwd
+ls CMakeLists.txt data/groupA.txt src/data_analysis_main.cpp
+
+# Only remove outputs when the project-root markers exist.
+if [ -f CMakeLists.txt ] && [ -f data/groupA.txt ] && [ -f src/data_analysis_main.cpp ]; then
+  rm -rf -- build build-apps build-profile build-sanitize build-sanitize-refactor results
+  rm -rf -- unit_results tests/__pycache__
+  rm -f -- test_data.csv
+else
+  echo "Stop: change into 01-car-classification first."
+fi
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+ctest --test-dir build --output-on-failure
+./build/data_analysis
+./build/linear_classifier
+./build/mcculloch_pitts
+```
+
+On macOS, inspect the generated plots with `open results/figures`. Build folders
+are ignored by Git; the seven CSV/SVG sample outputs are intentionally tracked.
+Adding `.gitignore` rules does not untrack files previously committed to Git.
+
+## Project history
+
+The original CMSC 436 assignment was reconstructed in R from the original data,
+documentation, mathematical models, and reported results, then ported to C++17.
+The C++ version consolidates data handling and separates public interfaces,
+algorithm implementations, and application entry points. R scripts remain in
+`reference/r/` for historical comparison only; they are not part of the
+supported execution or testing workflow.

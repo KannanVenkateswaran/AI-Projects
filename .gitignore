@@ -1,20 +1,34 @@
 # macOS
 .DS_Store
 
-# R temporary files
+# VS Code
+.vscode/
+
+# R Temporary Files
 .Rhistory
 .RData
 .Ruserdata
 .Rproj.user/
 
-# VS Code settings
-.vscode/
+# C++ / CMake Build Directories
+build/
+build-*/
+cmake-build-*/
 
-# Temporary files
+# CMake Generated Files
+CMakeFiles/
+CMakeCache.txt
+CMakeUserPresets.json
+compile_commands.json
+
+# Temporary Files and Logs
 *.tmp
 *.log
 
-# CMake build directories
-build/
-build-profile/
-build-sanitize/
+# Profiling and Debugging Artifacts
+*.profraw
+*.profdata
+*.dSYM/
+
+# Project Archives
+/01-car-classification.zip

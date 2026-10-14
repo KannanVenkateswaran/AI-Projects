@@ -1,16 +1,14 @@
 // CMSC 436 - Project 1
 // Native C++ unit tests for the linear classifier.
 
+// Test the public interface linked to linear_classifier_lib.
+#include "linear_classifier.hpp"
+
 #include <cmath>
 #include <exception>
 #include <iostream>
 #include <stdexcept>
 #include <string>
-
-// Include the actual classifier implementation.
-// The original main() is excluded during unit testing.
-#include "../src/linear_classifier.cpp"
-
 
 // 1. Report failed tests.
 void check(bool condition, const std::string& message)
@@ -21,24 +19,16 @@ void check(bool condition, const std::string& message)
     }
 }
 
-
 // 2. Compare floating-point values.
-void check_close(double actual, double expected,
-                 const std::string& message)
+void check_close(double actual, double expected, const std::string& message)
 {
     constexpr double tolerance = 1e-9;
 
-    check(
-        std::isfinite(actual) &&
-        std::fabs(actual - expected) < tolerance,
-        message
-    );
+    check(std::isfinite(actual) && std::fabs(actual - expected) < tolerance, message);
 }
 
-
 // 3. Add a simulated vehicle to a dataset.
-void add_car(Dataset& dataset, int label,
-             double price, double weight)
+void add_car(Dataset& dataset, int label, double price, double weight)
 {
     Car car{};
 
@@ -48,7 +38,6 @@ void add_car(Dataset& dataset, int label,
 
     dataset.cars.push_back(car);
 }
-
 
 int main()
 {
@@ -62,23 +51,12 @@ int main()
 
         // Weighted sum = 2(0.25) + 0.50 = 1.00
 
-        check(
-            predict_car_size(car, 0.95) == 1,
-            "Classification above threshold"
-        );
+        check(predict_car_size(car, 0.95) == 1, "Classification above threshold");
 
-        check(
-            predict_car_size(car, 1.05) == 0,
-            "Classification below threshold"
-        );
-
+        check(predict_car_size(car, 1.05) == 0, "Classification below threshold");
 
         // TEST 2: Exact threshold boundary.
-        check(
-            predict_car_size(car, 1.00) == 1,
-            "Classification exactly at threshold"
-        );
-
+        check(predict_car_size(car, 1.00) == 1, "Classification exactly at threshold");
 
         // TEST 3: Confusion matrix.
         Dataset dataset;
@@ -105,68 +83,29 @@ int main()
         check(cm.fn == 1, "False negatives");
         check(cm.tn == 3, "True negatives");
 
-
         // TEST 4: Classification metrics.
         const Metrics metrics = calculate_metrics(cm);
 
-        check_close(
-            metrics.accuracy,
-            100.0 * 5.0 / 7.0,
-            "Accuracy"
-        );
+        check_close(metrics.accuracy, 100.0 * 5.0 / 7.0, "Accuracy");
 
-        check_close(
-            metrics.error,
-            100.0 * 2.0 / 7.0,
-            "Error rate"
-        );
+        check_close(metrics.error, 100.0 * 2.0 / 7.0, "Error rate");
 
-        check_close(
-            metrics.precision,
-            100.0 * 2.0 / 3.0,
-            "Precision"
-        );
+        check_close(metrics.precision, 100.0 * 2.0 / 3.0, "Precision");
 
-        check_close(
-            metrics.recall,
-            100.0 * 2.0 / 3.0,
-            "Recall"
-        );
+        check_close(metrics.recall, 100.0 * 2.0 / 3.0, "Recall");
 
-        check_close(
-            metrics.specificity,
-            75.0,
-            "Specificity"
-        );
+        check_close(metrics.specificity, 75.0, "Specificity");
 
-        check_close(
-            metrics.false_positive_rate,
-            25.0,
-            "False positive rate"
-        );
+        check_close(metrics.false_positive_rate, 25.0, "False positive rate");
 
-        check_close(
-            metrics.false_negative_rate,
-            100.0 / 3.0,
-            "False negative rate"
-        );
+        check_close(metrics.false_negative_rate, 100.0 / 3.0, "False negative rate");
 
-        check_close(
-            metrics.f1,
-            100.0 * 4.0 / 6.0,
-            "F1-score"
-        );
-
+        check_close(metrics.f1, 100.0 * 4.0 / 6.0, "F1-score");
 
         // TEST 5: Undefined metrics.
-        check(
-            std::isnan(percent(5.0, 0.0)),
-            "Division by zero should return NaN"
-        );
+        check(std::isnan(percent(5.0, 0.0)), "Division by zero should return NaN");
 
-
-        std::cout
-            << "All linear classifier unit tests passed.\n";
+        std::cout << "All linear classifier unit tests passed.\n";
 
         return 0;
     }

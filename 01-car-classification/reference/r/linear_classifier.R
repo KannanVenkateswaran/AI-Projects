@@ -1,10 +1,11 @@
+# Archived reference only; not used by the C++ build or tests.
 # Name: Kannan Venkateswaran
 # Refactor Date: 10/11/2026
 # CMSC 436 - Project 1: Car Classification
-# File: src/linear_classifier.R
+# File: reference/r/linear_classifier.R
 #
 # Run from the project root:
-#   Rscript src/linear_classifier.R
+#   Rscript reference/r/linear_classifier.R
 #
 # Classifier documented in the original confusion-matrix calculations:
 #   big car (1) if 2 * normalized_price + normalized_weight >= threshold
