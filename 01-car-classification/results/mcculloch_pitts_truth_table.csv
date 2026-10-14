@@ -1,4 +1,4 @@
-"X","Y","Z","weighted_sum","inequality","neuron_output","expected_not_X_or_Y"
+X,Y,Z,weighted_sum,inequality,neuron_output,expected_not_X_or_Y
 0,0,0,0,"0 >= -1",1,1
 0,0,1,1,"1 >= -1",1,1
 0,1,0,3,"3 >= -1",1,1

@@ -266,6 +266,8 @@ void plot_car_data(const Dataset & dataset, char group_name, double threshold, c
     }
 }
 
+#ifndef CAR_CLASSIFICATION_UNIT_TEST
+
 int main()
 {
     try
@@ -301,3 +303,5 @@ int main()
         return 1;
     }
 }
+
+#endif

@@ -179,6 +179,9 @@ void save_results(const Neuron& neuron, const std::vector<TruthRow>& rows, const
 }
 
 // 5. Execute and handle errors.
+
+#ifndef CAR_CLASSIFICATION_UNIT_TEST
+
 int main()
 {
     try
@@ -201,3 +204,5 @@ int main()
         return 1;
     }
 }
+
+#endif

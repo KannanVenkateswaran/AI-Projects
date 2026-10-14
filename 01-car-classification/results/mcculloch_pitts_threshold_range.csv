@@ -1,2 +1,2 @@
-"weight_X","weight_Y","weight_Z","original_threshold","lower_exclusive","upper_inclusive","logic_function"
--3,3,1,-1,-2,0,"NOT X OR Y"
+weight_X,weight_Y,weight_Z,original_threshold,lower_exclusive,upper_inclusive,logic_function
+-3,3,1,-1,-2,0,NOT X OR Y

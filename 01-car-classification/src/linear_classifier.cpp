@@ -235,6 +235,9 @@ Metrics calculate_metrics(const ConfusionMatrix& cm)
 }
 
 // 5. Print results and save two CSV files
+
+#ifndef CAR_CLASSIFICATION_UNIT_TEST
+
 int main()
 {
     try
@@ -305,3 +308,5 @@ int main()
         return 1;
     }
 }
+
+#endif

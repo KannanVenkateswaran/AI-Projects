@@ -13,3 +13,8 @@
 # Temporary files
 *.tmp
 *.log
+
+# CMake build directories
+build/
+build-profile/
+build-sanitize/

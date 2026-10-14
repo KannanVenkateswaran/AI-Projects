@@ -1,0 +1,240 @@
+// CMSC 436 - Project 1
+// Native C++ unit tests for data analysis.
+
+#include <cmath>
+#include <exception>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+
+// Include the actual implementation being tested.
+// CMake excludes its original main() function.
+#include "../src/data_analysis.cpp"
+
+
+// 1. Report failed tests.
+void check(bool condition, const std::string& message)
+{
+    if (!condition)
+    {
+        throw std::runtime_error("Test failed: " + message);
+    }
+}
+
+
+// 2. Compare floating-point values.
+void check_close(double actual, double expected,
+                 const std::string& message)
+{
+    constexpr double tolerance = 1e-9;
+
+    check(
+        std::isfinite(actual) &&
+        std::fabs(actual - expected) < tolerance,
+        message
+    );
+}
+
+
+int main()
+{
+    try
+    {
+        // TEST 1: Min-max normalization.
+        Range range{10.0, 30.0};
+
+        check_close(
+            range.normalize(10.0), 0.0,
+            "Minimum should normalize to zero"
+        );
+
+        check_close(
+            range.normalize(20.0), 0.5,
+            "Midpoint should normalize to 0.5"
+        );
+
+        check_close(
+            range.normalize(30.0), 1.0,
+            "Maximum should normalize to one"
+        );
+
+
+        // TEST 2: Constant-valued ranges.
+        Range constant_range{5.0, 5.0};
+
+        bool caught_constant = false;
+
+        try
+        {
+            constant_range.normalize(5.0);
+        }
+        catch (const std::runtime_error&)
+        {
+            caught_constant = true;
+        }
+
+        check(
+            caught_constant,
+            "Constant-valued range must throw an exception"
+        );
+
+
+        // TEST 3: Valid numeric parsing.
+        check_close(
+            parse_number("42.5"), 42.5,
+            "Parse positive decimal"
+        );
+
+        check_close(
+            parse_number(" -3.75 "), -3.75,
+            "Parse negative decimal with whitespace"
+        );
+
+
+        // TEST 4: Invalid numeric parsing.
+        bool caught_invalid = false;
+
+        try
+        {
+            parse_number("12invalid");
+        }
+        catch (const std::invalid_argument&)
+        {
+            caught_invalid = true;
+        }
+
+        check(
+            caught_invalid,
+            "Malformed numeric string must be rejected"
+        );
+
+        bool caught_nan = false;
+
+        try
+        {
+            parse_number("nan");
+        }
+        catch (const std::invalid_argument&)
+        {
+            caught_nan = true;
+        }
+
+        check(
+            caught_nan,
+            "Non-finite numeric value must be rejected"
+        );
+
+
+        // TEST 5: Load a small, controlled dataset.
+        const fs::path data_file = "test_data.csv";
+
+        {
+            std::ofstream file(data_file);
+
+            check(
+                static_cast<bool>(file),
+                "Create test dataset"
+            );
+
+            file << "10000,2000,0\n";
+            file << "20000,4000,1\n";
+            file << "15000,3000,0\n";
+
+            file.close();
+
+            check(
+                static_cast<bool>(file),
+                "Write test dataset"
+            );
+        }
+
+        const Dataset dataset = load_car_data(data_file);
+
+        check(dataset.cars.size() == 3,
+              "Dataset should contain three cars");
+
+        check_close(dataset.prices.min, 10000.0,
+                    "Minimum price");
+
+        check_close(dataset.prices.max, 20000.0,
+                    "Maximum price");
+
+        check_close(dataset.weights.min, 2000.0,
+                    "Minimum weight");
+
+        check_close(dataset.weights.max, 4000.0,
+                    "Maximum weight");
+
+        check(dataset.cars[0].is_big_car == 0,
+              "First car classification");
+
+        check(dataset.cars[1].is_big_car == 1,
+              "Second car classification");
+
+
+        // TEST 6: Independently normalized features.
+        check_close(
+            dataset.cars[0].normalized_price, 0.0,
+            "First car normalized price"
+        );
+
+        check_close(
+            dataset.cars[1].normalized_price, 1.0,
+            "Second car normalized price"
+        );
+
+        check_close(
+            dataset.cars[2].normalized_price, 0.5,
+            "Third car normalized price"
+        );
+
+        check_close(
+            dataset.cars[0].normalized_weight, 0.0,
+            "First car normalized weight"
+        );
+
+        check_close(
+            dataset.cars[1].normalized_weight, 1.0,
+            "Second car normalized weight"
+        );
+
+        check_close(
+            dataset.cars[2].normalized_weight, 0.5,
+            "Third car normalized weight"
+        );
+
+
+        // TEST 7: SVG visualization.
+        const fs::path plot_file =
+            fs::path("unit_results") / "test_plot.svg";
+
+        plot_car_data(dataset, 'T', 0.95, plot_file);
+
+        check(
+            fs::exists(plot_file),
+            "SVG plot must be created"
+        );
+
+        check(
+            fs::file_size(plot_file) > 0,
+            "SVG plot must not be empty"
+        );
+
+
+        // Clean up files generated by this test.
+        fs::remove(data_file);
+        fs::remove_all("unit_results");
+
+        std::cout
+            << "All data analysis unit tests passed.\n";
+
+        return 0;
+    }
+    catch (const std::exception& error)
+    {
+        std::cerr << error.what() << '\n';
+        return 1;
+    }
+}
